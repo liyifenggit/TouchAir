@@ -10,6 +10,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Platform-macOS%2011.0%2B-blue?style=flat-square&logo=apple" alt="Platform" />
+  <img src="https://img.shields.io/badge/Architecture-Universal%202%20(Intel%20%2B%20Apple%20Silicon)-success?style=flat-square" alt="Architecture" />
   <img src="https://img.shields.io/badge/Language-Swift%206-orange?style=flat-square&logo=swift" alt="Language" />
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License" />
 </p>
@@ -23,8 +24,8 @@
 当你在 **访达 (Finder)** 中选中任意文件时，MacBook 的 **触控条 (Touch Bar)** 会立刻亮起一套精美的高效动作栏，让你脱离鼠标和繁琐的快捷键组合，指尖轻触即可搞定文件管理：
 
 ```text
-[ 📡 隔空投送: 文件名 ]    [ ✏️ 重命名 ]    [ 🗑️ 移至废纸篓 ]      [ ✕ ]
-      (Apple 经典蓝)          (工具暖橙色)        (警示红色)
+[ 📡 隔空投送: 文件名 ]   [ 📋 复制路径 ]   [ ✏️ 重命名 ]   [ 🗑️ 废纸篓 ]      [ ✕ ]
+      (Apple 经典蓝)          (极客青色)        (工具暖橙)       (警示红色)
 ```
 
 ## ✨ 核心特性
@@ -32,28 +33,33 @@
 - 📡 **隔空投送 (AirDrop) 秒投**
   - 配备自主矢量渲染的官方蓝白同心圆雷达波纹图标；
   - 触控条轻按一下，屏幕中央瞬间呼出系统隔空投送面板，选人即发。
+- 📋 **一键复制完整路径 (Copy Path)**
+  - 告别复杂的快捷键，轻按触控条即可将文件的绝对 POSIX 路径复制到系统剪贴板；
+  - 多选时自动合并为多行路径，方便在终端或代码编辑器中快速粘贴。
 - ✏️ **一键触控重命名 (Inline Rename)**
   - 轻触触控条上的铅笔图标，选中的文件名立刻变为高亮编辑框；
   - 双手无需离开键盘，直接打新名字按回车完成更名。
 - 🗑️ **安全移至废纸篓 (Safe Trash)**
   - 省去按反人类的 `Cmd + Delete` 快捷键，轻按触控条垃圾桶按钮即可将文件扔进废纸篓；
   - 接入 macOS 原生安全回收机制，若有误触随时按 `Cmd + Z` 即可一键撤销恢复。
+- ⚡ **Universal 2 架构支持**
+  - 同时原生适配 **Intel x86_64** 芯片与 **Apple Silicon arm64** (M1/M2) 芯片。
 - 💎 **系统级置顶渲染 (System Modal)**
   - 突破 macOS 触控条全宽控制条（Full Control Strip）的遮挡限制，使用底层 Direct IMP 直连系统模态，确保 100% 稳定亮起。
 - 🍃 **极致轻量**
-  - 仅约 136 KB 可执行文件，后台内存占用仅 ~15MB，CPU 占用 0.0%，完全无感静默运行。
+  - 仅约 200 KB 可执行文件，后台内存占用仅 ~15MB，CPU 占用 0.0%，完全无感静默运行。
 
 ---
 
 ## 🛠️ 编译与打包
 
-本项目无需庞大的 Xcode IDE，直接使用 macOS 自带的 Swift 命令行工具链即可极速编译：
+本项目无需庞大的 Xcode IDE，直接使用 macOS 自带的 Swift 命令行工具链即可编译为 Universal 2 通用二进制：
 
 ```bash
 git clone https://github.com/liyifenggit/TouchAir.git
 cd TouchAir
 
-# 一键极速编译打包并自动代码签名
+# 一键编译并打包双架构通用 App
 ./build.sh
 
 # 启动体验

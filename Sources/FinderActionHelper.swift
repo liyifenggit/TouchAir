@@ -3,6 +3,22 @@ import Cocoa
 class FinderActionHelper {
     static let shared = FinderActionHelper()
     
+    /// Copy the full POSIX path(s) of the selected file(s) to system clipboard
+    @discardableResult
+    func copyPaths(urls: [URL]) -> Bool {
+        guard !urls.isEmpty else { return false }
+        
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        
+        // Single file: copy single path; Multiple files: join with newlines
+        let text = urls.map { $0.path }.joined(separator: "\n")
+        let success = pasteboard.setString(text, forType: .string)
+        
+        NSLog("[TouchAir] Copied \(urls.count) path(s) to clipboard: \(text)")
+        return success
+    }
+    
     /// Trigger in-place inline renaming in Finder (simulates Return key on the selected item)
     func triggerRename() {
         DispatchQueue.global(qos: .userInitiated).async {
@@ -31,7 +47,6 @@ class FinderActionHelper {
             DispatchQueue.main.async {
                 if let error = error {
                     NSLog("[TouchAir] Failed to recycle files: \(error.localizedDescription)")
-                    // Fallback to AppleScript if needed
                     self.fallbackTrashWithAppleScript(urls: urls, completion: completion)
                 } else {
                     NSLog("[TouchAir] Successfully moved \(urls.count) file(s) to Trash")
