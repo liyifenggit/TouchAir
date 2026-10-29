@@ -3,6 +3,25 @@ import Cocoa
 class FinderActionHelper {
     static let shared = FinderActionHelper()
     
+    /// Copy the actual file(s) to system clipboard (equivalent to Cmd + C in Finder)
+    @discardableResult
+    func copyFiles(urls: [URL]) -> Bool {
+        guard !urls.isEmpty else { return false }
+        
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        
+        // Modern file writing
+        let ok = pasteboard.writeObjects(urls as [NSPasteboardWriting])
+        
+        // Legacy file list for maximum compatibility across third-party apps
+        let paths = urls.map { $0.path }
+        pasteboard.setPropertyList(paths, forType: NSPasteboard.PasteboardType("NSFilenamesPboardType"))
+        
+        NSLog("[TouchAir] Copied \(urls.count) file object(s) to clipboard: \(paths)")
+        return ok
+    }
+    
     /// Copy the full POSIX path(s) of the selected file(s) to system clipboard
     @discardableResult
     func copyPaths(urls: [URL]) -> Bool {

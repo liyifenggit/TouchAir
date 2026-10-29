@@ -4,6 +4,7 @@ class TouchBarManager: NSObject, NSTouchBarDelegate {
     static let shared = TouchBarManager()
     
     private let itemAirDrop = NSTouchBarItem.Identifier("com.touchair.action.airdrop")
+    private let itemCopyFile = NSTouchBarItem.Identifier("com.touchair.action.copyfile")
     private let itemCopyPath = NSTouchBarItem.Identifier("com.touchair.action.copypath")
     private let itemRename = NSTouchBarItem.Identifier("com.touchair.action.rename")
     private let itemTrash = NSTouchBarItem.Identifier("com.touchair.action.trash")
@@ -11,6 +12,7 @@ class TouchBarManager: NSObject, NSTouchBarDelegate {
     
     private var modalTouchBar: NSTouchBar?
     private var airdropButton: NSButton?
+    private var copyFileButton: NSButton?
     private var copyPathButton: NSButton?
     private var renameButton: NSButton?
     private var trashButton: NSButton?
@@ -32,10 +34,10 @@ class TouchBarManager: NSObject, NSTouchBarDelegate {
     private func updateItemIdentifiers() {
         guard let tb = modalTouchBar else { return }
         if currentURLs.count == 1 {
-            tb.defaultItemIdentifiers = [itemAirDrop, itemCopyPath, itemRename, itemTrash, itemClose]
+            tb.defaultItemIdentifiers = [itemAirDrop, itemCopyFile, itemCopyPath, itemRename, itemTrash, itemClose]
         } else {
             // Batch selection: Rename doesn't apply to multiple files
-            tb.defaultItemIdentifiers = [itemAirDrop, itemCopyPath, itemTrash, itemClose]
+            tb.defaultItemIdentifiers = [itemAirDrop, itemCopyFile, itemCopyPath, itemTrash, itemClose]
         }
     }
     
@@ -52,6 +54,22 @@ class TouchBarManager: NSObject, NSTouchBarDelegate {
             
             item.view = button
             self.airdropButton = button
+            return item
+        } else if identifier == itemCopyFile {
+            let item = NSCustomTouchBarItem(identifier: identifier)
+            let button = NSButton(title: " 拷贝", target: self, action: #selector(handleCopyFileAction))
+            button.bezelStyle = .rounded
+            
+            if let icon = NSImage(systemSymbolName: "doc.on.clipboard", accessibilityDescription: "Copy File") {
+                let config = NSImage.SymbolConfiguration(pointSize: 13, weight: .semibold)
+                button.image = icon.withSymbolConfiguration(config)
+                button.imagePosition = .imageLeading
+            }
+            button.font = NSFont.systemFont(ofSize: 13, weight: .medium)
+            button.contentTintColor = NSColor.systemMint
+            
+            item.view = button
+            self.copyFileButton = button
             return item
         } else if identifier == itemCopyPath {
             let item = NSCustomTouchBarItem(identifier: identifier)
@@ -125,17 +143,20 @@ class TouchBarManager: NSObject, NSTouchBarDelegate {
                 // Update titles
                 if urls.count == 1 {
                     let name = urls[0].lastPathComponent
-                    let truncated = name.count > 12 ? String(name.prefix(10)) + "…" : name
+                    let truncated = name.count > 10 ? String(name.prefix(8)) + "…" : name
                     self.airdropButton?.title = " 隔空投送: \(truncated)"
+                    self.copyFileButton?.title = " 拷贝"
                     self.copyPathButton?.title = " 复制路径"
                     self.trashButton?.title = " 废纸篓"
                 } else {
                     self.airdropButton?.title = " 隔空投送 (\(urls.count))"
-                    self.copyPathButton?.title = " 复制路径 (\(urls.count))"
+                    self.copyFileButton?.title = " 拷贝 (\(urls.count))"
+                    self.copyPathButton?.title = " 路径 (\(urls.count))"
                     self.trashButton?.title = " 废纸篓 (\(urls.count))"
                 }
                 
                 // Reset button feedback styles
+                self.copyFileButton?.contentTintColor = NSColor.systemMint
                 self.copyPathButton?.contentTintColor = NSColor.systemTeal
                 
                 self.presentModal()
@@ -153,6 +174,21 @@ class TouchBarManager: NSObject, NSTouchBarDelegate {
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
             self?.airdropButton?.contentTintColor = NSColor.systemBlue
+        }
+    }
+    
+    @objc private func handleCopyFileAction() {
+        guard !currentURLs.isEmpty else { return }
+        NSLog("[TouchAir] Copy File tapped from Touch Bar for \(currentURLs.count) file(s)")
+        
+        FinderActionHelper.shared.copyFiles(urls: currentURLs)
+        
+        // Visual feedback
+        copyFileButton?.title = " ✓ 已拷贝"
+        copyFileButton?.contentTintColor = NSColor.systemGreen
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
+            self?.dismissModal()
         }
     }
     
